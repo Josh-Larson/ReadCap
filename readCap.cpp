@@ -7,18 +7,17 @@
  *    strings
  * 
  * To-Do:
- *  # Brute-Force CRC Calculator
  *  # Packet Order, have it determine which packets come after what
  *  # Read ObjController message
  *  # Read DeltasMessage
  * 
  * Example CRC's:
-[14:11:35] <@Treeku> FD8E7F7F = 4,253,974,399
-[14:11:38] <@Treeku> BE09EB2F = 3,188,321,071
-[14:11:41] <@Treeku> 8982BBFE = 2,307,046,398
-[14:11:43] <@Treeku> 60C3FFFD = 1,623,457,789
-[14:11:46] <@Treeku> EA6BE77D = 3,932,940,157
-[14:11:50] <@Treeku> E327FB7F = 3,811,048,319
+ * [14:11:35] <@Treeku> FD8E7F7F = 4,253,974,399
+ * [14:11:38] <@Treeku> BE09EB2F = 3,188,321,071
+ * [14:11:41] <@Treeku> 8982BBFE = 2,307,046,398
+ * [14:11:43] <@Treeku> 60C3FFFD = 1,623,457,789
+ * [14:11:46] <@Treeku> EA6BE77D = 3,932,940,157
+ * [14:11:50] <@Treeku> E327FB7F = 3,811,048,319
  */
 #include <iostream>
 #include <sstream>
@@ -289,39 +288,34 @@ void getCRC(string file) {
 	bool crcWorks = false;
 	unsigned int crc = 0;
 	time_t startTime = time(NULL);
-	for (modifier = startingModifier; modifier > 1 && !crcWorks; modifier /= 2) {
-		if (modifier != startingModifier) currentStart += modifier;
-		cout << "At modifier " << modifier << "\n";
-		cout << "\tTime taken:      " << time(NULL) - startTime << "\n";
-		cout << "\tCRC's Processed: " << (UINT_MAX-currentStart) / 8 << "\n";
-		for (unsigned int i = currentStart; i < UINT_MAX && !crcWorks; i++) {
-			
-			/* Debugging stuff - not neccessary */
-			if (((i-starting)/*/8*/) % 1000000 == 0) cout << (i-starting)/1000000/*/8*/ << "\n";
-			if (time(NULL) - startTime >= 60) { crcWorks = true; crc = i; }
-			
-			if (i < 800000000) continue;
-			
-			/* Test the hexcode to see if it's accurate */
-			if (*((char *)&i)   <= 5) continue;
-			if (*((char *)&i+1) <= 5) continue;
-			if (*((char *)&i+2) <= 5) continue;
-			if (*((char *)&i+3) <= 5) continue;
-			
-			
-			/* Test the 3 zero's in a row */
-			if (i % 1000000000 < 1000000) continue;
-			if (i % 1000000 < 1000) continue;
-			if (i % 1000 == 0) continue;
-			
-			/* Test the CRC */
-			crcWorks = testCRC(i, file);
-			if (crcWorks) crc = i; // See if the CRC works
-		}
+	vector <unsigned int> crcList;
+	for (unsigned int i = currentStart; i < UINT_MAX; i++) {
+		
+		/* Debugging stuff - not neccessary */
+		if (((i-starting)/*/8*/) % 10000000 == 0) cout << (i-starting)/1000000/*/8*/ << " million.\n";
+		
+		if (i < 800000000) continue;
+		
+		/* Test the hexcode to see if it's accurate */
+		if (*((char *)&i)   <= 5) continue;
+		if (*((char *)&i+1) <= 5) continue;
+		if (*((char *)&i+2) <= 5) continue;
+		if (*((char *)&i+3) <= 5) continue;
+		
+		
+		/* Test the 3 zero's in a row */
+		if (i % 1000000000 < 1000000) continue;
+		if (i % 1000000 < 1000) continue;
+		if (i % 1000 == 0) continue;
+		
+		/* Test the CRC */
+		crcWorks = testCRC(i, file);
+		if (crcWorks) crcList.push_back(i); // See if the CRC works
 	}
-	cout << (crc-starting) << " crc's per minute.\n";
-	cout << "Ending CRC: " << crc << "\n";
-	//cout << "Working CRC: 0x" << hex << crc << "\n";
+	cout << "Working CRC's:\n";
+	for (int i = 0; i < crcList.size(); i++) {
+		cout << "\t#" << (i+1) << ": " << crcList[i] << "\n";
+	}
 }
 /*
 CRC Test 1: 7630       - Original
